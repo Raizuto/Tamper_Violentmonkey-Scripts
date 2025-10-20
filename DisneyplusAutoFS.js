@@ -2,7 +2,7 @@
 // @name         Disney+ Auto Fullscreen
 // @namespace    http://tampermonkey.net/
 // @version      1.12
-// @description  To auto fullscreen Disney+ videos (it stays on) so you can binge watch all you want without using the F11 key whilst on autoplay is on. Created using the following website: https://workik.com/ai-powered-javascript-code-debugger with refining done by ChapGPT. There might be some unneeded stuff in here but it works!
+// @description  To auto fullscreen Disney+ videos on click (it stays on) so you can binge watch all you want without using the F11 key whilst on autoplay is on. Created using the following website: https://workik.com/ai-powered-javascript-code-debugger with refining done by ChapGPT. There might be some unneeded stuff in here but it works!
 // @author       Raizuto
 // @match        *://www.disneyplus.com/*
 // @grant        none
