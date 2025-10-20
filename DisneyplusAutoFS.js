@@ -1,10 +1,10 @@
 // ==UserScript==
-// @name         Disney+ Auto Fullscreen - (Tight Continue selector)
+// @name         Disney+ Auto Fullscreen - (Streaming enhanced Firefox Plugin Compatiable)
 // @namespace    http://tampermonkey.net/
-// @version      1.11
-// @description  To auto fullscreen Disney+ videos (it stays on) so you can you binge watch all you want without using the F11 key whilst on autoplay is on. Created using the following website: https://workik.com/ai-powered-javascript-code-debugger . There might be some unneeded stuff in here but it works!
+// @version      1.12
+// @description  To auto fullscreen Disney+ videos (it stays on) so you can binge watch all you want without using the F11 key whilst on autoplay is on. Created using the following website: https://workik.com/ai-powered-javascript-code-debugger with refining done by ChapGPT. There might be some unneeded stuff in here but it works! Warning: Currently NOT friendly with Netflix Marathon (Pausable).
 // @author       Raizuto
-// @match        https://www.disneyplus.com/*
+// @match        *://www.disneyplus.com/*
 // @grant        none
 // @license      MIT
 // @homepageURL  https://github.com/Raizuto/Tampermonkey-Script/
@@ -12,6 +12,12 @@
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=disneyplus.com
 // @run-at       document-idle
 // ==/UserScript==
+
+// Ensure the script only runs on Disney+
+if (!window.location.hostname.includes('disneyplus.com')) {
+  console.log('Disney+ Auto Fullscreen: not on Disney+, exiting.');
+  return;
+}
 
 (function () {
   'use strict';
@@ -21,6 +27,11 @@
   const STYLE_ID = 'dp-auto-fs-style';
 
   let lastUserGesture = 0;
+  var manualExit = (typeof manualExit !== 'undefined') ? manualExit : false; // tracks if user manually exited fullscreen
+  let suppressUntil = 0; // don't overlay or auto-FS until this time
+  let rapidPlayCount = 0; // counter for programmatic play bursts
+  const OVERLAY_CLASS = 'dp-auto-fs-overlay'; // unique overlay class name
+
   function now() { return Date.now(); }
 
   function markUserGesture() {
@@ -116,6 +127,7 @@
   let lastOverlay = null;
   function makeOverlay(parent) {
     const overlay = document.createElement('div');
+    overlay.className = OVERLAY_CLASS;
     Object.assign(overlay.style, {
       position: 'absolute',
       inset: '0',
@@ -150,6 +162,12 @@
     if (!parent) parent = document.body;
     try { if (getComputedStyle(parent).position === 'static') parent.style.position = 'relative'; } catch (e) {}
     lastOverlay = makeOverlay(parent);
+    if (Date.now() < suppressUntil) return lastOverlay;
+    try {
+      if (document.getElementById('overlay-root') || document.getElementById('Marathon_saveBtn') || document.querySelector('.marathon-overlay')) {
+        return lastOverlay;
+      }
+    } catch (e) {}
     parent.appendChild(lastOverlay);
     return lastOverlay;
   }
@@ -167,7 +185,13 @@
 
   function onFullscreenChange() {
     const fsEl = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement;
-    if (fsEl === document.documentElement) applyFsStyles(); else removeFsStyles();
+    if (fsEl === document.documentElement) {
+      applyFsStyles();
+      manualExit = false; // reset flag when fullscreen entered
+    } else {
+      removeFsStyles();
+      manualExit = true; // mark user-exited fullscreen
+    }
     if (isFullscreen()) removeOverlay();
     setTimeout(() => { try { findVideos().forEach(v => attachToVideoNode(v)); } catch (e) {} }, 150);
   }
@@ -176,40 +200,10 @@
   document.addEventListener('mozfullscreenchange', onFullscreenChange);
   document.addEventListener('MSFullscreenChange', onFullscreenChange);
 
-  // attach to video nodes
-  function attachToVideoNode(v) {
-    if (!v || v._autoFsAttached) return;
-    v._autoFsAttached = true;
-    v._pausedByUser = false;
-
-    v.addEventListener('pause', (ev) => {
-      try {
-        if ((ev && ev.isTrusted) || (now() - lastUserGesture < RECENT_GESTURE_MS)) {
-          v._pausedByUser = true;
-          if (!isFullscreen()) {
-            const container = findPlayerContainerForVideo(v) || v.parentNode || document.body;
-            showOverlayIn(container);
-          }
-        }
-      } catch (e) {}
-    }, true);
-
-    v.addEventListener('play', (ev) => {
-      try {
-        const playIsUserGesture = !!((ev && ev.isTrusted) || (now() - lastUserGesture < RECENT_GESTURE_MS));
-        if (v._pausedByUser && !playIsUserGesture) return;
-        if (playIsUserGesture) v._pausedByUser = false;
-        if (!v.paused && !v.ended && !isFullscreen()) {
-          const container = findPlayerContainerForVideo(v) || v.parentNode || document.body;
-          showOverlayIn(container);
-        }
-      } catch (e) {}
-    }, true);
-  }
-
   const mo = new MutationObserver((mutations) => {
     for (const m of mutations) {
       for (const node of m.addedNodes || []) {
+        try { suppressUntil = Date.now() + 2000; } catch (e) {}
         if (node.nodeType !== 1) continue;
         try {
           if (node.tagName && node.tagName.toLowerCase() === 'video') attachToVideoNode(node);
@@ -340,7 +334,7 @@
 
   window.addEventListener('beforeunload', () => { mo.disconnect(); hiveObserver.disconnect(); removeFsStyles(); });
 
-  console.log('Disney+ Auto Fullscreen (v1.11 - tight Continue selector) initialized');
+  console.log('Disney+ Auto Fullscreen (v1.12) initialized');
 
   // attachToVideoNode definition placed last to keep code organization
   function attachToVideoNode(v) {
@@ -353,6 +347,7 @@
         if ((ev && ev.isTrusted) || (now() - lastUserGesture < RECENT_GESTURE_MS)) {
           v._pausedByUser = true;
           if (!isFullscreen()) {
+            if (manualExit) return; // skip overlay if user exited fullscreen
             const container = findPlayerContainerForVideo(v) || v.parentNode || document.body;
             showOverlayIn(container);
           }
@@ -362,6 +357,12 @@
 
     v.addEventListener('play', (ev) => {
       try {
+        const playIsUserGesture_tmp = !!((ev && ev.isTrusted) || (now() - lastUserGesture < RECENT_GESTURE_MS));
+        if (!playIsUserGesture_tmp) {
+          rapidPlayCount++;
+        } else { rapidPlayCount = 0; }
+        if (rapidPlayCount > 3) { suppressUntil = Date.now() + 3000; return; }
+
         const playIsUserGesture = !!((ev && ev.isTrusted) || (now() - lastUserGesture < RECENT_GESTURE_MS));
         if (v._pausedByUser && !playIsUserGesture) return;
         if (playIsUserGesture) v._pausedByUser = false;
