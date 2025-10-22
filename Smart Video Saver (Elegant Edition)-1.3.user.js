@@ -19,13 +19,13 @@
 
 // Change the MAX_ACTIVE below to the desired number of allowed videos to be loaded at once! 
 // Set to 1 by default for small monitors or smaller browser viewer experience.
-// Videos will fade in and videos you scroll by stop playing once out of view! 
-// I HIGHLY recommend activating Performance Saver mode. This will out right stop all videos 
+// Videos will fade in and videos you are done watching will stop playing once scrolled out of view! 
+// This will out right stop all autoplaying videos off your active screen so this script will keep them
 // from loading off screen & not buffer at all. Saves so much CPU. I looked everywhere for something like this!
 
 (() => {
   'use strict';
-  const KEYS = { DEBUG: 'svs_debug', PERF: 'svs_perf' };
+  const KEYS = { DEBUG: 'svs_debug' };
   const MAX_ACTIVE = 1, OFFSET = 800, VISIBLE_THRESHOLD = 0.85, DELAY = 500;
   const get = (k, d) => GM_getValue(k, d);
   const set = (k, v) => GM_setValue(k, v);
@@ -33,7 +33,6 @@
   const log = (...a) => get(KEYS.DEBUG, false) && console.log(`[SVS @${currentSite}]`, ...a);
 
   if (get(KEYS.DEBUG) === undefined) set(KEYS.DEBUG, false);
-  if (get(KEYS.PERF) === undefined) set(KEYS.PERF, false);
 
   const toggle = (k, label) => {
     const current = get(k, false);
@@ -52,13 +51,7 @@
   };
 
   GM_registerMenuCommand(`${get(KEYS.DEBUG) ? 'Disable' : 'Enable'} Debug Logs`, () => toggle(KEYS.DEBUG, 'Debug Logs'));
-  GM_registerMenuCommand(`${get(KEYS.PERF) ? 'Disable' : 'Enable'} Performance Saver`, () => toggle(KEYS.PERF, 'Performance Saver'));
   GM_registerMenuCommand('Force Reset', reset);
-
-  if (!get(KEYS.PERF, false)) {
-    if (get(KEYS.DEBUG, false)) console.log(`[SVS @${currentSite}] Performance Saver is OFF — videos will not be managed.`);
-    return;
-  }
 
   const active = new Set();
   const io = new IntersectionObserver(entries => {
@@ -103,5 +96,5 @@
   document.addEventListener('DOMContentLoaded', watch);
   mo.observe(document.documentElement, { childList: true, subtree: true });
 
-  log('Smart Video Saver initialized with Performance Saver:', get(KEYS.PERF));
+  log('Smart Video Saver initialized with Performance Saver: enabled');
 })();
