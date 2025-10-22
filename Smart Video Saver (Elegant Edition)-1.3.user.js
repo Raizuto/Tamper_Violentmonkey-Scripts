@@ -3,14 +3,22 @@
 // @namespace    http://tampermonkey.net/
 // @version      1.3
 // @description  Pause offscreen videos and gently fade in visible ones for smooth, efficient browsing.
-// @author       Rae
+// @author       Raizuto & ChatGPT
 // @match        *://*.reddit.com/*
-// @match        *://*.redgifs.com/*
+// @match        *://*.x.com/*
 // @grant        GM_registerMenuCommand
 // @grant        GM_getValue
 // @grant        GM_setValue
 // @grant        GM_deleteValue
 // ==/UserScript==
+
+// Feel free to add whatever sites via @match up above :D 
+
+// Change the MAX_ACTIVE below to the desired number of allowed videos to be loaded at once! 
+// Set to 1 by default for small monitors or smaller browser viewer experience.
+// Videos will fade in and videos you scroll by stop playing once out of view! 
+// I HIGHLY recommend activating Performance Saver mode. This will out right stop all videos 
+// from loading off screen & not buffer at all. Saves so much CPU. I looked everywhere for something like this!
 
 (() => {
   'use strict';
