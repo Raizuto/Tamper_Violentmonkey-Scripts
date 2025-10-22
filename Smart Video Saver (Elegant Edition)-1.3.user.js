@@ -4,12 +4,13 @@
 // @version      1.3
 // @description  Pause offscreen videos and gently fade in visible ones for smooth, efficient browsing.
 // @author       Raizuto & ChatGPT
+// @icon         https://cdn.iconscout.com/icon/free/png-512/free-reddit-icon-svg-download-png-1911984.png
 // @match        *://*.reddit.com/*
-// @match        *://*.x.com/*
 // @grant        GM_registerMenuCommand
 // @grant        GM_getValue
 // @grant        GM_setValue
 // @grant        GM_deleteValue
+// @license      MIT
 // ==/UserScript==
 
 // Feel free to add whatever sites via @match up above :D 
