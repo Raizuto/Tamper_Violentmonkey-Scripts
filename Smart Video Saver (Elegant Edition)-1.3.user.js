@@ -11,6 +11,8 @@
 // @grant        GM_setValue
 // @grant        GM_deleteValue
 // @license      MIT
+// @homepageURL  https://github.com/Raizuto/Tampermonkey-Script/
+// @supportURL   https://github.com/Raizuto/Tampermonkey-Script/issues
 // ==/UserScript==
 
 // Feel free to add whatever sites via @match up above :D 
