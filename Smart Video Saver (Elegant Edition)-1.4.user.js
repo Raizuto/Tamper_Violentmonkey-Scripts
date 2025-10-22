@@ -43,23 +43,18 @@
     setTimeout(() => location.reload(), 300);
   };
 
-  const reset = () => {
-    if (confirm('Clear all Smart Video Saver settings?')) {
-      Object.values(KEYS).forEach(GM_deleteValue);
-      location.reload();
-    }
-  };
-
   GM_registerMenuCommand(`${get(KEYS.DEBUG) ? 'Disable' : 'Enable'} Debug Logs`, () => toggle(KEYS.DEBUG, 'Debug Logs'));
-  GM_registerMenuCommand('Force Reset', reset);
 
   const active = new Set();
+  const videos = new Set();
+  
+  
   const io = new IntersectionObserver(entries => {
     for (const e of entries) {
       const v = e.target;
       if (!(v instanceof HTMLVideoElement)) continue;
-      const visible = e.intersectionRatio >= VISIBLE_THRESHOLD;
-      if (visible && active.size < MAX_ACTIVE) {
+      const mostlyVisible = e.intersectionRatio >= VISIBLE_THRESHOLD;
+      if (mostlyVisible && active.size < MAX_ACTIVE) {
         if (v.dataset.fade !== '1') {
           v.style.opacity = 0;
           v.style.transition = 'opacity 0.5s ease';
@@ -73,7 +68,7 @@
             log('Playing', v);
           }
         }, DELAY);
-      } else if (!visible) {
+      } else if (!mostlyVisible) {
         v.pause();
         v.style.opacity = 0.6;
         active.delete(v);
@@ -86,6 +81,7 @@
     document.querySelectorAll('video').forEach(v => {
       if (!v.dataset.svs) {
         v.dataset.svs = '1';
+		videos.add(v);
         io.observe(v);
         log('Observed new video element:', v);
       }
