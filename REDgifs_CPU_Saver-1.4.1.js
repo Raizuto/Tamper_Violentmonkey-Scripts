@@ -1,54 +1,39 @@
 // ==UserScript==
-// @name         Smart Video Saver (Elegant Edition)
-// @namespace    http://tampermonkey.net/
-// @version      1.4
+// @name         REDgifs CPU% Saver
+// @version      1.4.1
 // @description  Pause offscreen videos and gently fade in visible ones for smooth, efficient browsing.
 // @author       Raizuto & ChatGPT
 // @icon         https://cdn.iconscout.com/icon/free/png-512/free-reddit-icon-svg-download-png-1911984.png
-// @match        *://*.reddit.com/*
-// @grant        GM_registerMenuCommand
+// @match        *://*.redgifs.com/*
 // @grant        GM_getValue
 // @grant        GM_setValue
-// @grant        GM_deleteValue
 // @license      MIT
-// @homepageURL  https://github.com/Raizuto/Tampermonkey-Script/
-// @supportURL   https://github.com/Raizuto/Tampermonkey-Script/issues
+// @homepageURL  https://github.com/Raizuto/Tampermonkey-Scripts/
+// @supportURL   https://github.com/Raizuto/Tampermonkey-Scripts/issues
 // ==/UserScript==
 
-// Feel free to add whatever sites via @match up above :D 
-
-// Change the MAX_ACTIVE below to the desired number of allowed videos to be loaded at once! 
-// Set to 1 by default for small monitors or smaller browser viewer experience.
-// Videos will fade in and videos you are done watching will stop playing once scrolled out of view! 
-// This will out right stop all autoplaying videos off your active screen so this script will keep them
-// from loading off screen & not buffer at all. Saves so much CPU. I looked everywhere for something like this!
+// Adjust the @match if you want to use this elsewhere. :D 
+// Change the MAX_ACTIVE below to the desired number of allowed videos 
+// to be loaded at once (this includes off screen videos)!
+// Set to 1 by default for 21.5" monitors whether they are landscape or portrait.
 
 (() => {
   'use strict';
-  const KEYS = { DEBUG: 'svs_debug' };
-  const MAX_ACTIVE = 1, OFFSET = 800, VISIBLE_THRESHOLD = 0.85, DELAY = 500;
+  const KEYS = { ENABLE: 'svs_enabled', DEBUG: 'svs_debug', PERF: 'svs_perf' };
+  const MAX_ACTIVE = 1, OFFSET = 800, VISIBLE_THRESHOLD = 0.85, DELAY = 550;
   const get = (k, d) => GM_getValue(k, d);
   const set = (k, v) => GM_setValue(k, v);
-  const currentSite = window.location.hostname;
-  const log = (...a) => get(KEYS.DEBUG, false) && console.log(`[SVS @${currentSite}]`, ...a);
+  const log = (...a) => get(KEYS.DEBUG, false) && console.log('[SVS]', ...a);
 
+  if (get(KEYS.ENABLE) === undefined) set(KEYS.ENABLE, true);
   if (get(KEYS.DEBUG) === undefined) set(KEYS.DEBUG, false);
+  if (get(KEYS.PERF) === undefined) set(KEYS.PERF, true);
 
-  const toggle = (k, label) => {
-    const current = get(k, false);
-    const newVal = !current;
-    set(k, newVal);
-    console.log(`%c[SVS]%c ${label} ${newVal ? 'enabled' : 'disabled'} on ${currentSite}.`,
-      'color:#7E63A4;font-weight:bold;', '');
-    setTimeout(() => location.reload(), 300);
-  };
-
-  GM_registerMenuCommand(`${get(KEYS.DEBUG) ? 'Disable' : 'Enable'} Debug Logs`, () => toggle(KEYS.DEBUG, 'Debug Logs'));
+  if (!get(KEYS.ENABLE, true) || !get(KEYS.PERF, false)) return;
 
   const active = new Set();
   const videos = new Set();
-  
-  
+
   const io = new IntersectionObserver(entries => {
     for (const e of entries) {
       const v = e.target;
@@ -71,6 +56,7 @@
       } else if (!mostlyVisible) {
         v.pause();
         v.style.opacity = 0.6;
+        v.currentTime = 0;
         active.delete(v);
         log('Paused', v);
       }
@@ -81,9 +67,9 @@
     document.querySelectorAll('video').forEach(v => {
       if (!v.dataset.svs) {
         v.dataset.svs = '1';
-		videos.add(v);
+        videos.add(v);
         io.observe(v);
-        log('Observed new video element:', v);
+        log('Observed', v);
       }
     });
   };
@@ -91,6 +77,4 @@
   const mo = new MutationObserver(() => watch());
   document.addEventListener('DOMContentLoaded', watch);
   mo.observe(document.documentElement, { childList: true, subtree: true });
-
-  log('Smart Video Saver initialized with Performance Saver: enabled');
 })();
