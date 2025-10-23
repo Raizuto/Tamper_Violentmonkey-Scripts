@@ -3,13 +3,13 @@
 // @version      1.4.1
 // @description  Pause offscreen videos and gently fade in visible ones for smooth, efficient browsing.
 // @author       Raizuto & ChatGPT
-// @icon         https://cdn.iconscout.com/icon/free/png-512/free-reddit-icon-svg-download-png-1911984.png
+// @icon         https://www.google.com/s2/favicons?sz=64&domain=redgifs.com
 // @match        *://*.redgifs.com/*
 // @grant        GM_getValue
 // @grant        GM_setValue
 // @license      MIT
-// @homepageURL  https://github.com/Raizuto/Tampermonkey-Scripts/
-// @supportURL   https://github.com/Raizuto/Tampermonkey-Scripts/issues
+// @homepageURL  https://github.com/Raizuto/Tamper_Violentmonkey-Scripts/
+// @supportURL   https://github.com/Raizuto/Tamper_Violentmonkey-Scripts/issues
 // ==/UserScript==
 
 // Adjust the @match if you want to use this elsewhere. :D 
