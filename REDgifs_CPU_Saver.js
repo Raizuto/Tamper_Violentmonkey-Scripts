@@ -16,6 +16,7 @@
 // Change the MAX_ACTIVE below to the desired number of allowed videos 
 // to be loaded at once (this includes off screen videos)!
 // Set to 1 by default for 21.5" monitors whether they are landscape or portrait.
+// So if it doesn't work quite right for you tweak the Visible Threshold below
 
 (() => {
   'use strict';
