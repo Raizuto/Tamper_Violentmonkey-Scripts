@@ -1,6 +1,5 @@
 // ==UserScript==
 // @name         Disney+ Auto Fullscreen
-// @namespace    http://tampermonkey.net/
 // @version      1.12
 // @description  To auto fullscreen Disney+ videos on click (it stays on) so you can binge watch all you want without using the F11 key whilst on autoplay is on. Created using the following website: https://workik.com/ai-powered-javascript-code-debugger with refining done by ChapGPT. There might be some unneeded stuff in here but it works!
 // @author       Raizuto
@@ -155,23 +154,6 @@
     }, { once: true });
     return overlay;
   }
-
-  function showOverlayIn(parent) {
-    if (isFullscreen()) return null;
-    removeOverlay();
-    if (!parent) parent = document.body;
-    try { if (getComputedStyle(parent).position === 'static') parent.style.position = 'relative'; } catch (e) {}
-    lastOverlay = makeOverlay(parent);
-    if (Date.now() < suppressUntil) return lastOverlay;
-    try {
-      if (document.getElementById('overlay-root') || document.getElementById('Marathon_saveBtn') || document.querySelector('.marathon-overlay')) {
-        return lastOverlay;
-      }
-    } catch (e) {}
-    parent.appendChild(lastOverlay);
-    return lastOverlay;
-  }
-  function removeOverlay() { if (lastOverlay && lastOverlay.isConnected) lastOverlay.remove(); lastOverlay = null; }
 
   function selectPersistentFsTarget(hiveEl) {
     if (hiveEl) {
