@@ -6,8 +6,8 @@
 // @match        *://www.disneyplus.com/*
 // @grant        none
 // @license      MIT
-// @homepageURL  https://github.com/Raizuto/Tampermonkey-Scripts/
-// @supportURL   https://github.com/Raizuto/Tampermonkey-Scripts/issues
+// @homepageURL  https://github.com/Raizuto/Tamper_Violentmonkey-Scripts/
+// @supportURL   https://github.com/Raizuto/Tamper_Violentmonkey-Scripts/issues
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=disneyplus.com
 // @run-at       document-idle
 // ==/UserScript==
